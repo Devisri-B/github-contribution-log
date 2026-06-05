@@ -1,16 +1,16 @@
 # Contribution [#]: [Issue Title]
 
-**Contribution Number:** [1 / 2 / 3]  
-**Student:** [Your Name]  
-**Issue:** [GitHub issue link]  
-**Status:** [Phase I / Phase II / Phase III / Phase IV] [In Progress / Complete]
+**Contribution Number:** [1]
+**Student:** Devi Sri Bandaru
+**Issue:** https://github.com/tinaudio/synth-setter/issues/600 
+**Status:** [Phase I] [In Progress]
 
 ---
 
 ## Why I Chose This Issue
 
 [1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
-
+This issue sharpens my proficiency in PyTorch Lightening and helps me deep dive into machine learning workflows. By working on this issue, I can learn the importance of clean, meaningful logs; eliminating redundant warnings.
 ---
 
 ## Understanding the Issue
