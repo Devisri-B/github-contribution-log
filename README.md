@@ -1,15 +1,16 @@
-# Contribution [#]: [Issue Title]
+# Contribution [#]: synth-setter
 
-**Contribution Number:** [1]
-**Student:** Devi Sri Bandaru
-**Issue:** https://github.com/tinaudio/synth-setter/issues/600 
-**Status:** [Phase I] [In Progress]
+- **Contribution Number:** [1]
+- **Student:** Devi Sri Bandaru
+- **Issue:** https://github.com/tinaudio/synth-setter/issues/600 
+- **Status:** [Phase I] [In Progress]
 
 ---
 
 ## Why I Chose This Issue
 
-This issue sharpens my proficiency in PyTorch Lightening and helps me deep dive into machine learning workflows. By working on this issue, I can learn the importance of clean, meaningful logs; eliminating redundant warnings.
+  This issue sharpens my proficiency in PyTorch Lightening and helps me deep dive into machine learning workflows. By working on this issue, I can learn the importance of clean, meaningful logs; eliminating redundant warnings.
+  
 ---
 
 ## Understanding the Issue
