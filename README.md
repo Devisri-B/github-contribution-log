@@ -9,7 +9,6 @@
 
 ## Why I Chose This Issue
 
-[1-2 paragraphs explaining why this issue interests you, how it matches your skills/learning goals, what you hope to learn]
 This issue sharpens my proficiency in PyTorch Lightening and helps me deep dive into machine learning workflows. By working on this issue, I can learn the importance of clean, meaningful logs; eliminating redundant warnings.
 ---
 
