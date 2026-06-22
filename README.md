@@ -3,7 +3,7 @@
 - Contribution Number: 1
 - Student: Devi Sri Bandaru
 - Issue: https://github.com/tinaudio/synth-setter/issues/600
-- Status: Phase II Complete (reproduced + plan)
+- Status: Phase III Complete (fix implemented, tests passing)
 
 ---
 
@@ -124,34 +124,45 @@ Evaluate:
 
 ### Unit Tests
 
-- [ ] Test 1: ksin_ff training_step calls self.log with a batch_size equal to inputs.shape[0]. This extends the existing mock-log tests in tests/models/test_ksin_ff_module.py.
-- [ ] Test 2: ksin_flow_matching validation_step and test_step pass batch_size on every self.log call.
-- [ ] Test 3: surge_flowvae training_step passes batch_size on both self.log and self.log_dict.
+- [x] test_steps_log_metrics_with_explicit_batch_size (tests/models/test_ksin_ff_module.py): drives the ksin feed-forward train, val and test steps with a mocked logger and asserts every self.log call passes batch_size equal to the input batch size. Built on the existing mock-log helpers already in that file.
+
+The ksin flow-matching and Surge Flow-VAE modules get the same mechanical change. The flow-matching path is also exercised end to end by the integration test below, and the Surge path runs only under the VST-gated suite (requires_vst), which I cannot run locally.
 
 ### Integration Tests
 
-- [ ] test_train_fast_dev_run_tiny_model_tiny_data raises no ambiguous collection warning when captured with recwarn.
-- [ ] The full make test-fast suite still passes.
+- [x] test_train_fast_dev_run_emits_no_batch_size_warning (tests/test_train.py): runs a real fast_dev_run training run (the default model=ffn, datamodule=ksin, trainer=cpu config) and asserts no ambiguous-batch_size warning is raised. It captures warnings directly with warnings.catch_warnings because the suite's filterwarnings = ["ignore::UserWarning"] would otherwise hide the PossibleUserWarning.
+- [x] Full fast suite: uv run make test-fast gives 2413 passed, 98 skipped. The single failure (test_pinned_baselines_resolve) is a pre-existing @pytest.mark.network test that fetches a remote baseline ref and cannot run in my offline environment, so it is unrelated to this change.
 
 ### Manual Testing
 
-Run the reproduction command before and after the fix:
+Re-ran the Phase II reproduction command before and after the fix:
 uv run pytest "tests/test_train.py::test_train_fast_dev_run_tiny_model_tiny_data" -W always -p no:cacheprovider
-The warning is there before the fix and gone after it.
+Before the fix the ambiguous-collection warning printed; after the fix there are zero such warnings.
 
 ---
 
 ## Implementation Notes
 
-### Week [X] Progress
+### Week 1 Progress (Phase III)
 
-Phase III, to be filled in as I implement.
+What I built:
+- Added an explicit batch_size to every self.log and self.log_dict call in the three LightningModules named in the issue. The batch size comes from the input tensor's first dimension: inputs.shape[0] in ksin_ff, batch[0].shape[0] (train) and inputs.shape[0] (val/test) in ksin_flow_matching, and mel_spec.shape[0] in surge_flowvae. In surge_flowvae I unpacked mel_spec from model_step instead of re-indexing the batch, so the tuple-typed step signatures stay type-clean.
+- ksin_flow_matching also logs grad norms in on_before_optimizer_step with on_epoch=True, and that hook has no batch to infer from. I cache the batch size during training_step (self._batch_size, initialized to None in __init__) and reuse it there, so the logged values are unchanged.
+- Added two tests (see Testing Strategy) and confirmed the warning is gone.
+
+Challenges faced:
+- The hardest part was realizing the warning is hidden by pyproject.toml's filterwarnings = ["ignore::UserWarning"], so the test suite never showed it. My integration test captures warnings directly to get around that.
+- I added batch_size to the log calls in ksin_ff test_step but at first forgot to define batch_size at the top of that method. ruff check (and a quick re-read of the diff) caught the undefined name before I committed.
+- make test-fast first failed with ModuleNotFoundError: h5py because the bare pytest in the Makefile resolved to my base conda Python, not the project .venv. Running uv run make test-fast fixed it.
 
 ### Code Changes
 
-- Files to modify (Phase III): ksin_ff_module.py, ksin_flow_matching_module.py, surge_flowvae_module.py, plus a regression test.
-- Key commits: Phase III links.
-- Approach decisions: take the batch size from the input audio tensor's first dimension, and only change the logging arguments, not the metric behavior.
+- Files modified: src/synth_setter/models/ksin_ff_module.py, src/synth_setter/models/ksin_flow_matching_module.py, src/synth_setter/models/surge_flowvae_module.py, tests/models/test_ksin_ff_module.py, tests/test_train.py
+- Branch: https://github.com/Devisri-B/synth-setter/tree/fix-issue-600
+- Key commits:
+  - [4c01c42](https://github.com/Devisri-B/synth-setter/commit/4c01c42): fix(monitoring): pass batch_size to self.log in LightningModules
+  - [2c75c6e](https://github.com/Devisri-B/synth-setter/commit/2c75c6e): test(monitoring): cover explicit batch_size in module logging
+- Approach decisions: take the batch size from the input tensor's first dimension and change only the logging arguments, not the metric values. The value Lightning inferred was already correct, so the metrics themselves do not change.
 
 ---
 
@@ -173,7 +184,10 @@ Status: [Awaiting review / Iterating / Approved / Merged]
 
 ### Technical Skills Gained
 
-[What you learned technically]
+- How PyTorch Lightning infers batch size when logging metrics, and why passing batch_size explicitly matters for non-tensor batches (tuples and dicts).
+- Reading a project's pytest configuration (filterwarnings) to understand why a real warning was invisible in CI.
+- Writing a warning-capturing regression test with warnings.catch_warnings, and extending an existing mock-based unit test file.
+- Working with uv and a project .venv, and matching a repo's ruff formatting and conventional-commit conventions.
 
 ### Challenges Overcome
 
@@ -181,7 +195,7 @@ The thing that stuck with me is that a clean test run does not mean a clean code
 
 ### What I'd Do Differently Next Time
 
-[Reflection on your process]
+I would run ruff check on each file right after editing it instead of after all three. That would have caught the undefined batch_size in test_step right away rather than at the end.
 
 ---
 
