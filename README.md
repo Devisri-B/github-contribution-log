@@ -168,16 +168,14 @@ Challenges faced:
 
 ## Pull Request
 
-PR Link: [GitHub PR URL when submitted]
+PR Link: https://github.com/tinaudio/synth-setter/pull/1754
 
-PR Description: [Draft or final PR description, much of the content above can be adapted]
+PR Description: Adds an explicit batch_size to every self.log / self.log_dict call in the three LightningModules named in #600, so Lightning no longer warns about inferring batch_size from an ambiguous (tuple/dict) batch. Includes a unit test and a warning-capturing integration test.
 
 Maintainer Feedback:
-- [Date]: [Summary of feedback received]
-- [Date]: [How you addressed it]
+- (awaiting first review)
 
-Status: [Awaiting review / Iterating / Approved / Merged]
-
+Status: Awaiting review
 ---
 
 ## Learnings & Reflections
